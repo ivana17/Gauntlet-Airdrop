@@ -9,7 +9,6 @@ contract MyNFT is ERC721, ERC721URIStorage, Ownable {
     uint256 public totalMinted;
     string[3] internal tokenURIs;
     mapping(address => bool) internal minters;
-
     event MyNFTMinted(address minter, address to);
 
     constructor() ERC721("MyNFT", "MNF") {
