@@ -1,23 +1,24 @@
-import { ethers } from 'hardhat';
-import { MerkleTree } from 'merkletreejs';
-import keccak256 from 'keccak256';
-import { expect } from 'chai';
-import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
+import { ethers } from "hardhat";
+import { MerkleTree } from "merkletreejs";
+import keccak256 from "keccak256";
+import { expect } from "chai";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
-describe('MyNFT Airdrop', function () {
+describe("MyNFT Airdrop", function () {
   async function deployTokenFixture() {
     const [owner, addr1, addr2, addr3, addr4] = await ethers.getSigners();
 
-    const MyNFT = await ethers.getContractFactory('MyNFT');
+    const MyNFT = await ethers.getContractFactory("MyNFT");
+
     const myNFT = await MyNFT.deploy();
 
     const leaves = [addr1, addr2, addr3].map((x) =>
-      keccak256(x.address).toString('hex')
+      keccak256(x.address).toString("hex")
     );
     const merkleTree = new MerkleTree(leaves, keccak256, { sort: true });
     const root = merkleTree.getHexRoot();
 
-    const MyAirdrop = await ethers.getContractFactory('MyAirdrop');
+    const MyAirdrop = await ethers.getContractFactory("MyAirdrop");
     const myAirdrop = await MyAirdrop.deploy(myNFT.address, root);
 
     await myNFT.allowMint(myAirdrop.address);
@@ -35,20 +36,20 @@ describe('MyNFT Airdrop', function () {
     };
   }
 
-  it('Should allow MyAirdrop contract to mint MyNFT', async function () {
+  it("Should allow MyAirdrop contract to mint MyNFT", async function () {
     const { myNFT, myAirdrop, addr1 } = await loadFixture(deployTokenFixture);
     await expect(
       myNFT.connect(myAirdrop.signer).mintNft(addr1.address)
-    ).not.to.be.revertedWith('Invalid minter account.');
+    ).not.to.be.revertedWith("Invalid minter account.");
   });
 
-  it('Should claim MyNFT', async function () {
+  it("Should claim MyNFT", async function () {
     const { myAirdrop, addr2, merkleTree } = await loadFixture(
       deployTokenFixture
     );
     const proof = merkleTree.getHexProof(keccak256(addr2.address));
     await expect(myAirdrop.connect(addr2).claim(proof)).not.to.be.revertedWith(
-      'Invalid Merkle proof.'
+      "Invalid Merkle proof."
     );
   });
 
@@ -59,7 +60,7 @@ describe('MyNFT Airdrop', function () {
     const proof = merkleTree.getHexProof(keccak256(addr4.address));
     const badProof = proof.slice(0, -1);
     await expect(myAirdrop.connect(addr4).claim(badProof)).to.be.revertedWith(
-      'Invalid Merkle proof.'
+      "Invalid Merkle proof."
     );
   });
 
@@ -70,7 +71,7 @@ describe('MyNFT Airdrop', function () {
     const proof = merkleTree.getHexProof(keccak256(addr2.address));
     const badProof = proof.slice(0, -1);
     await expect(myAirdrop.connect(addr2).claim(badProof)).to.be.revertedWith(
-      'Invalid Merkle proof.'
+      "Invalid Merkle proof."
     );
   });
 
@@ -81,17 +82,17 @@ describe('MyNFT Airdrop', function () {
     const proof = merkleTree.getHexProof(keccak256(addr3.address));
     await myAirdrop.connect(addr3).claim(proof);
     await expect(myAirdrop.connect(addr3).claim(proof)).to.be.revertedWith(
-      'NFT already claimed.'
+      "NFT already claimed."
     );
   });
 
-  it('Should emit NFTClaimed event', async function () {
+  it("Should emit NFTClaimed event", async function () {
     const { myAirdrop, addr3, merkleTree } = await loadFixture(
       deployTokenFixture
     );
     const proof = merkleTree.getHexProof(keccak256(addr3.address));
     await expect(myAirdrop.connect(addr3).claim(proof))
-      .to.emit(myAirdrop, 'NFTClaimed')
+      .to.emit(myAirdrop, "NFTClaimed")
       .withArgs(addr3.address);
   });
 });
