@@ -15,6 +15,7 @@ contract MyNFT is ERC721, ERC721URIStorage, Ownable {
     constructor() ERC721("MyNFT", "MNF") {
         minters[msg.sender] = true;
         totalMinted = 0;
+        
         tokenURIs = [
             "ipfs://bafkreifqdtvm7c4xvp6ln5yg4fxb6pbbah3dylzp7rmpil6lng4dw226w4",
             "ipfs://bafybeicl7zisdevjfdgrsh7jk5unbjirr3ozxaepwue3ar7iaz5254bgfa",

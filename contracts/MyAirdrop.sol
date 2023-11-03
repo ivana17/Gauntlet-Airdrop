@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "./MyNFT.sol";
 
 contract MyAirdrop {
+
     address public immutable token;
     bytes32 public immutable merkleRoot;
 
@@ -22,12 +23,14 @@ contract MyAirdrop {
         require(!claimed[account], "NFT already claimed.");
 
         bytes32 node = keccak256(abi.encodePacked(account));
+
         require(
             MerkleProof.verify(merkleProof, merkleRoot, node),
             "Invalid Merkle proof."
         );
 
         MyNFT(token).mintNft(account);
+        
         claimed[account] = true;
 
         emit NFTClaimed(account);
